@@ -134,13 +134,12 @@ router.post(VALIDATE_USER_OTP_CODE, function (req, res, next) {
         res.json({ id: "Error in database query", error: err });
       }
 
-      if(otpDocument.otp == otpCode){
+      if(otpDocument && otpDocument.otp == otpCode){
         collection.deleteOne({ userName: userName }, function (err, otpDocument) {
           if (err) {
             res.json({ id: "Error in database query", error: err });
           }
           res.json({ success: true, message: "OTP SMS is valid" })
-          
         })
 
       }else {
