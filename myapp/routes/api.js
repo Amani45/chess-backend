@@ -10,10 +10,15 @@ const colOtps = "Otps"
 
 
 const USERS = "/users"
-const ADD_USER = USERS + "/add"
+const SIGNUP_USER = USERS + "/signup"
 const GET_USER_CHESSMEN = USERS + "/get/:userName"
 const VALIDATE_USER_CHESS_CODE = USERS + "/validate/sequence"
 const VALIDATE_USER_OTP_CODE = USERS + "/validate/otp"
+
+
+router.get("/ping", function (req, res, next) {
+  res.json({ success : true, message : "Ping Ping!"})
+});
 
 
 /**
@@ -37,15 +42,18 @@ router.get(USERS, function (req, res, next) {
   })
 });
 
-router.post(ADD_USER, function (req, res, next) {
+/**
+ * Signup new user
+ */
+router.post(SIGNUP_USER, function (req, res, next) {
 
   db.initialize(dbName, colUsers, (collection) => {
 
-    collection.insert(req.body, function (err, ids) {
+    collection.insertOne(req.body, function (err, user) {
       if (err) {
         res.json({ id: "Error in database query", error: err });
       }
-      res.json(ids)
+      res.json({ success : true, body : {id : user.insertedId, ...req.body}})
 
     })
 
@@ -60,6 +68,15 @@ router.get(GET_USER_CHESSMEN, function (req, res, next) {
   const userName = req.params.userName
   db.initialize(dbName, colUsers, (collection) => {
 
+    // collection.findOne({ userName: userName })
+    // .project({ userName: 1, chessSize: 1, 'chessCode.x': 1, 'chessCode.y': 1 },function (err, item) {
+    //   if (err) {
+    //     res.json({success: false, body : err})
+
+    //   }
+    //   res.json({success: true, body : item})
+    // })
+
 
     collection.find({ userName: userName })
       .project({ userName: 1, chessSize: 1, 'chessCode.x': 1, 'chessCode.y': 1 })
@@ -67,8 +84,10 @@ router.get(GET_USER_CHESSMEN, function (req, res, next) {
         console.log("ITEM:", item)
         if (err) {
           res.json({ id: "Error in database query", error: err });
+          res.json({success: false, body : f})
+
         }
-        res.json(item)
+        res.json({success: true, body : item})
 
       })
   }, (err) => {
@@ -91,7 +110,7 @@ router.post(VALIDATE_USER_CHESS_CODE, function (req, res, next) {
         res.json({ id: "Error in database query", error: err });
       }
 
-      if (auth.validateSequence(sequenceCode, user.chessCode, user.chessSize)) {
+      if (auth.validateSequence(sequenceCode.map(code => code.newMove), user.chessCode, user.chessSize)) {
         otp = auth.generateOTP()
         db.initialize(dbName, colOtps, (collectionOtp) => {
 
@@ -127,12 +146,16 @@ router.post(VALIDATE_USER_OTP_CODE, function (req, res, next) {
   const userName = req.body.userName
   const otpCode = req.body.otpCode
 
+  console.log(userName, " VS ", otpCode)
+
   db.initialize(dbName, colOtps, (collection) => {
 
     collection.findOne({ userName: userName }, function (err, otpDocument) {
       if (err) {
         res.json({ id: "Error in database query", error: err });
       }
+
+      console.log("OTP Doc", otpDocument)
 
       if(otpDocument && otpDocument.otp == otpCode){
         collection.deleteOne({ userName: userName }, function (err, otpDocument) {
