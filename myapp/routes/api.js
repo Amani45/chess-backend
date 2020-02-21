@@ -3,7 +3,6 @@ var router = express.Router();
 var db = require('../database');
 var sms = require('../sms');
 var auth = require('../authentication');
-
 const dbName = "chess"
 const colUsers = "Users"
 const colOtps = "Otps"
