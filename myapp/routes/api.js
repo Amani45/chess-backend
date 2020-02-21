@@ -81,10 +81,13 @@ router.get(GET_USER_CHESSMEN, function (req, res, next) {
       .project({ userName: 1, chessSize: 1, 'chessCode.x': 1, 'chessCode.y': 1 })
       .toArray(function (err, item) {
         console.log("ITEM:", item)
+        if(item.length == 0){
+          res.json({success: false, body : "User Not found!"})
+          return
+        }
         if (err) {
           res.json({ id: "Error in database query", error: err });
           res.json({success: false, body : f})
-
         }
         res.json({success: true, body : item})
 
