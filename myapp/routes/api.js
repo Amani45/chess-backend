@@ -11,6 +11,8 @@ const colOtps = "Otps"
 const USERS = "/users"
 const SIGNUP_USER = USERS + "/signup"
 const GET_USER_CHESSMEN = USERS + "/get/:userName"
+const VALIDATE_USER = USERS + "/validate/:userName"
+
 const VALIDATE_USER_CHESS_CODE = USERS + "/validate/sequence"
 const VALIDATE_USER_OTP_CODE = USERS + "/validate/otp"
 
@@ -40,6 +42,34 @@ router.get(USERS, function (req, res, next) {
     res.json({ id: "Error in database connection", error: err });
   })
 });
+
+
+router.get(VALIDATE_USER, function (req, res, next) {
+  const userName = req.params.userName
+  db.initialize(dbName, colUsers, (collection) => {
+
+
+    collection.findOne({ userName: userName }, function (err, user) {
+      console.log("User:", user)
+      if (err) {
+        res.json({ id: "Error in database query", error: err });
+      }
+
+      if(user){
+       res.json({ success : true})
+      }else {
+       res.json({ success : false})
+      }
+
+    })
+
+
+
+  }, (err) => {
+    res.json({ success: false, id: "Error in database connection", error: err });
+  })
+});
+
 
 /**
  * Signup new user
@@ -116,14 +146,28 @@ router.post(VALIDATE_USER_CHESS_CODE, function (req, res, next) {
         otp = auth.generateOTP()
         db.initialize(dbName, colOtps, (collectionOtp) => {
 
-          collectionOtp.insert({ userName: user.userName, otp: otp }, function (err, ids) {
+          collectionOtp.findOne({ userName: userName }, function (err, currentOtp) {
             if (err) {
               res.json({ id: "Error in database query", error: err });
             }
-            sms.sendSMS(user.phone, otp)
-            res.json({ success: true, message: "OTP SMS sent" })
-          })
+            if(currentOtp){
+              sms.sendSMS(user.phone, currentOtp.otp)
+              res.json({ success: true, message: "OTP SMS sent" })
+            }else {
+              collectionOtp.insert({ userName: user.userName, otp: otp }, function (err, ids) {
+                if (err) {
+                  res.json({ id: "Error in database query", error: err });
+                }
+                sms.sendSMS(user.phone, otp)
+                res.json({ success: true, message: "OTP SMS sent" })
+              })
+            }
+            
 
+
+
+
+          })
         }, (err) => {
           res.json({ id: "Error in database connection", error: err });
         })
