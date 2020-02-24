@@ -9,7 +9,7 @@ const database = 'chess';
 
 
 const dbConnectionUrl = 'mongodb://' + userName + ':' + password + '@cluster0-shard-00-00-l32un.mongodb.net:27017,cluster0-shard-00-01-l32un.mongodb.net:27017,cluster0-shard-00-02-l32un.mongodb.net:27017/Chess?ssl=true&authSource=admin'
-
+// const dbConnectionUrl = 'mongodb://localhost:27017'
 function initialize(
     dbName,
     dbCollectionName,
