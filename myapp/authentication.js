@@ -161,6 +161,41 @@ function resetAttempt(userName, callback) {
 }
 
 
+// create login location for secret objects
+function createSecretLocation(userName,secret, callback) {
+
+    db.initialize('chess', 'logins', (collection) => {
+        collection.findOne({ userName: userName }, function (err, res) {
+
+            if(res == null){
+                collection.insertOne({ userName: userName, secret: secret }, function (err, user) {})
+            }else {
+                collection.update({ userName: userName }, { $set: { 'secret': secret } }, function (err, res) {})
+            }
+        })
+
+    }, (err) => {
+    })
+}
+
+function getSecretLocation(userName, callback) {
+
+    db.initialize('chess', 'logins', (collection) => {
+        collection.findOne({ userName: userName }, function (err, res) {
+
+            if(res == null){
+                callback({success : false})
+            }else {
+                callback({success : true, location : res.secret })
+            }
+        })
+
+    }, (err) => {
+    })
+}
+
+
+
 module.exports = {
-    generateOTP, validateSequence, isValidAccount
+    generateOTP, validateSequence, isValidAccount,createSecretLocation,getSecretLocation
 }

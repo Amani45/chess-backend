@@ -97,18 +97,8 @@ router.get(GET_USER_CHESSMEN, function (req, res, next) {
   const userName = req.params.userName
   db.initialize(dbName, colUsers, (collection) => {
 
-    // collection.findOne({ userName: userName })
-    // .project({ userName: 1, chessSize: 1, 'chessCode.x': 1, 'chessCode.y': 1 },function (err, item) {
-    //   if (err) {
-    //     res.json({success: false, body : err})
-
-    //   }
-    //   res.json({success: true, body : item})
-    // })
-
-
     collection.find({ userName: userName })
-      .project({ userName: 1, chessSize: 1, 'chessCode.x': 1, 'chessCode.y': 1 })
+      .project({ userName: 1, chessSize: 1, 'chessCode.x': 1, 'chessCode.y': 1 ,secret : 1 })
       .toArray(function (err, item) {
         console.log("ITEM:", item)
         if (item.length == 0) {
@@ -119,7 +109,15 @@ router.get(GET_USER_CHESSMEN, function (req, res, next) {
           res.json({ id: "Error in database query", error: err });
           res.json({ success: false, body: f })
         }
-        res.json({ success: true, body: item })
+
+
+      if(item[0].secret){
+        randomSecret = Math.floor(Math.random() * item[0].chessCode.length);
+        item[0].chessCode[randomSecret].isSecret = true
+        auth.createSecretLocation(userName,randomSecret)
+      }
+
+      res.json({ success: true, body: item })
 
       })
   }, (err) => {
@@ -151,7 +149,15 @@ router.post(VALIDATE_USER_CHESS_CODE, function (req, response, next) {
               response.json({ id: "Error in database query", error: err });
             }
 
-            if (auth.validateSequence(sequenceCode.map(code => code.newMove), user.chessCode, user.chessSize)) {
+           auth.getSecretLocation(user.userName, (res)=>{
+             console.log("RES SECRET : ", res)
+
+             if(res.success){
+              user.chessCode[res.location].chessman= user.secret
+             }
+
+             //
+             if (auth.validateSequence(sequenceCode.map(code => code.newMove), user.chessCode, user.chessSize)) {
               otp = auth.generateOTP()
               db.initialize(dbName, colOtps, (collectionOtp) => {
 
@@ -232,6 +238,11 @@ router.post(VALIDATE_USER_CHESS_CODE, function (req, response, next) {
 
               response.json({ success: false, message: "Chess Sequence is not valid" })
             }
+             //
+
+           })
+
+ 
 
           })
 
