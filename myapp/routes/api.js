@@ -6,6 +6,8 @@ var auth = require('../authentication');
 const dbName = "chess"
 const colUsers = "Users"
 const colOtps = "Otps"
+var Gpio = require('onoff').Gpio;
+var LED = new Gpio(4, 'out');
 
 
 const USERS = "/users"
@@ -282,6 +284,15 @@ router.post(VALIDATE_USER_OTP_CODE, function (req, res, next) {
           if (err) {
             res.json({ id: "Error in database query", error: err });
           }
+          // 
+          if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
+            LED.writeSync(1); //set pin state to 1 (turn LED on)
+            setTimeout( ()=>{
+              LED.writeSync(0); //set pin state to 0 (turn LED off)
+
+            }, 1000)
+          } 
+          //
           res.json({ success: true, message: "OTP SMS is valid" })
         })
 
