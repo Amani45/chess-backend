@@ -6,8 +6,8 @@ var auth = require('../authentication');
 const dbName = "chess"
 const colUsers = "Users"
 const colOtps = "Otps"
-var Gpio = require('onoff').Gpio;
-var LED = new Gpio(4, 'out');
+//var Gpio = require('onoff').Gpio;
+//var LED = new Gpio(4, 'out');
 
 
 const USERS = "/users"
@@ -33,26 +33,10 @@ router.get("/open", function (req, res, next) {
   res.json({ success: true, message: "Sending Open Single!" })
 });
 
-
-/**
- * Find All Users
- */
-router.get(USERS, function (req, res, next) {
-  db.initialize(dbName, colUsers, (collection) => {
-
-    collection.find().toArray(function (err, items) {
-
-
-      if (err) {
-        res.json({ id: "Error in database query", error: err });
-      }
-      sms.sendSMS("+966540410245", auth.generateOTP())
-      res.json(items);
-    });
-
-  }, (err) => {
-    res.json({ id: "Error in database connection", error: err });
-  })
+router.get("/sms/:phone", function (req, res, next) {
+  const phone = req.params.phone
+  sms.sendSMS(phone, auth.generateOTP())
+  res.json({ success: true, message: "Sending SMS to " + phone })
 });
 
 
