@@ -6,8 +6,8 @@ var auth = require('../authentication');
 const dbName = "chess"
 const colUsers = "Users"
 const colOtps = "Otps"
-//var Gpio = require('onoff').Gpio;
-//var LED = new Gpio(4, 'out');
+var Gpio = require('onoff').Gpio;
+var LED = new Gpio(4, 'out');
 
 
 const USERS = "/users"
