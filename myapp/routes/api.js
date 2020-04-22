@@ -2,12 +2,14 @@ var express = require('express');
 var router = express.Router();
 var db = require('../database');
 var sms = require('../sms');
+var Lock = require('../lock');
+var EventEmitter = require('events');
 var auth = require('../authentication');
 const dbName = "chess"
 const colUsers = "Users"
 const colOtps = "Otps"
-var Gpio = require('onoff').Gpio;
-var LED = new Gpio(4, 'out');
+//var Gpio = require('onoff').Gpio;
+//var LED = new Gpio(4, 'out');
 
 
 const USERS = "/users"
@@ -24,12 +26,37 @@ router.get("/ping", function (req, res, next) {
 });
 
 router.get("/open", function (req, res, next) {
-  if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
-    LED.writeSync(1); //set pin state to 1 (turn LED on)
-    setTimeout( ()=>{
-      LED.writeSync(0); //set pin state to 0 (turn LED off)
-    }, 1000)
-  } 
+  // if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
+  //   LED.writeSync(1); //set pin state to 1 (turn LED on)
+  //   setTimeout( ()=>{
+  //     LED.writeSync(0); //set pin state to 0 (turn LED off)
+  //   }, 1000)
+  // } 
+
+
+
+  var io = new EventEmitter();
+
+  // io.on('event', () => {
+  //   console.log('an event occurred!');
+  // });
+
+  // io.emit('event');
+
+
+  //   if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
+  //   LED.writeSync(1); //set pin state to 1 (turn LED on)
+  //   setTimeout( ()=>{
+  //     LED.writeSync(0); //set pin state to 0 (turn LED off)
+  //   }, 1000)
+  // } 
+
+
+  lockInstance = new Lock(io, process.env.GPIO);
+  lockInstance.open()
+  console.log(lockInstance.status())
+
+
   res.json({ success: true, message: "Sending Open Single!" })
 });
 
