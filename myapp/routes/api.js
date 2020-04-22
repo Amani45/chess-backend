@@ -37,24 +37,15 @@ router.get("/open", function (req, res, next) {
 
   var io = new EventEmitter();
 
-  // io.on('event', () => {
-  //   console.log('an event occurred!');
-  // });
-
-  // io.emit('event');
-
-
-  //   if (LED.readSync() === 0) { //check the pin state, if the state is 0 (or off)
-  //   LED.writeSync(1); //set pin state to 1 (turn LED on)
-  //   setTimeout( ()=>{
-  //     LED.writeSync(0); //set pin state to 0 (turn LED off)
-  //   }, 1000)
-  // } 
-
 
   lockInstance = new Lock(io, process.env.GPIO);
   lockInstance.open()
-  console.log(lockInstance.status())
+
+  io.on('lock', ($event) => {
+    console.log('an event:', $event);
+  });
+
+
 
 
   res.json({ success: true, message: "Sending Open Single!" })
