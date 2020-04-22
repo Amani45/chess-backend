@@ -26,7 +26,7 @@ var Lock = function(io, gpio){
 	};
 
 	this.open = function(){
-		if(this.allowOpen && !this.isOpen){
+		//if(this.allowOpen && !this.isOpen){
 			this.gpio.value(true);
 			io.emit('lock', this.status());
 			this.isOpen = true;
@@ -35,7 +35,7 @@ var Lock = function(io, gpio){
 			setTimeout(function(){
 				that.close();
 			}, 3000);
-		}
+		//}
 	};
 
 	this.close = function(){
