@@ -2,7 +2,8 @@ var isPi = process.env.IS_PI;
 
 var Lock = function(io, gpio){
 
-	console.log("isPi", isPi)
+	console.log("isPi", process.env.IS_PI)
+	console.log("gpio", gpio)
 	
 	if(isPi){
 		this.gpio = require('pi-pins').connect(parseInt(gpio));
@@ -30,7 +31,7 @@ var Lock = function(io, gpio){
 	this.open = function(){
 		//if(this.allowOpen && !this.isOpen){
 			this.gpio.value(true);
-			io.emit('lock', this.status() + '@open');
+			io.emit('lock', JSON.stringify(this.status()) + '@open');
 			this.isOpen = true;
 			//Only open for 2 seconds
 			var that = this;
@@ -42,7 +43,7 @@ var Lock = function(io, gpio){
 
 	this.close = function(){
 		this.gpio.value(false);
-		io.emit('lock', this.status() + '@close');
+		io.emit('lock', JSON.stringify(this.status()) + '@close');
 		this.isOpen = false;
 	};
 
