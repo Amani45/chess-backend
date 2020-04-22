@@ -28,7 +28,7 @@ var Lock = function(io, gpio){
 	this.open = function(){
 		//if(this.allowOpen && !this.isOpen){
 			this.gpio.value(true);
-			io.emit('lock', this.status());
+			io.emit('lock', this.status() + + '@open');
 			this.isOpen = true;
 			//Only open for 2 seconds
 			var that = this;
@@ -40,7 +40,7 @@ var Lock = function(io, gpio){
 
 	this.close = function(){
 		this.gpio.value(false);
-		io.emit('lock', this.status());
+		io.emit('lock', this.status() + '@close');
 		this.isOpen = false;
 	};
 
